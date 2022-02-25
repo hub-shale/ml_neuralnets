@@ -233,6 +233,9 @@ plot(c_history)
 conv_model %>% predict(test_generator)
 ```
 
+## Comparison of NN/CNN for Binary Classification:
+**The **
+
 # Multiclass Neural Net
 
 ```{r}
@@ -241,7 +244,7 @@ train10_generator <- flow_images_from_directory(
   train_datagen,
   target_size = c(150, 150),
   batch_size = 30,
-  class_mode = "binary"
+  class_mode = "categorical"
 )
 
 test10_generator <- flow_images_from_directory(
@@ -249,7 +252,7 @@ test10_generator <- flow_images_from_directory(
   datagen,
   target_size = c(150, 150),
   batch_size = 10,
-  class_mode = "binary"
+  class_mode = "categorical"
 )
 
 val10_generator <- flow_images_from_directory(
@@ -257,16 +260,39 @@ val10_generator <- flow_images_from_directory(
   datagen,
   target_size = c(150, 150),
   batch_size = 10,
-  class_mode = "binary"
+  class_mode = "categorical"
 )
 ```
 
-
 ```{r}
-model <- keras_model_sequential() %>% 
+model10 <- keras_model_sequential() %>% 
   layer_dense(units = 64, activation = "relu", input_shape = c(150,150,3)) %>% 
   layer_dense(units = 64, activation = "relu") %>% 
-  layer_dense(units = 46, activation = "softmax")
+  layer_dense(units = 10, activation = "softmax")
+```
+
+```{r}
+model10 %>% compile(
+  optimizer = "rmsprop",
+  loss = "categorical_crossentropy",
+  metrics = c("accuracy")
+)
+```
+
+```{r}
+history10 <- model10 %>% fit(
+  train10_generator,
+  steps_per_epoch = 1,
+  epochs = 30,
+  validation_data = val10_generator,
+  validation_steps = 1
+)
+```
+
+```{r}
+plot(history10)
+
+model10 %>% predict(test10_generator)
 ```
 
 # Multiclass Convolutional Neural Net
@@ -274,3 +300,6 @@ model <- keras_model_sequential() %>%
 ```{r}
 
 ```
+
+## Comparison of NN/CNN for Categorical (n=10) Classification
+**The **
