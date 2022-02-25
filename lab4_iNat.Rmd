@@ -1,0 +1,134 @@
+---
+title: "iNaturalist"
+author: "Shale"
+date: "2/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Setup
+
+```{r}
+librarian::shelf(
+  digest, dplyr, DT, glue, purrr, readr, stringr, tidyr)
+
+# path to folder containing species directories of images
+dir_src  <- "/courses/EDS232/inaturalist-2021/train_mini"
+dir_dest <- "~/inat"
+dir.create(dir_dest, showWarnings = F)
+
+# get list of directories, one per species (n = 10,000 species)
+dirs_spp <- list.dirs(dir_src, recursive = F, full.names = T)
+n_spp <- length(dirs_spp)
+
+# set seed (for reproducible results) 
+# just before sampling (otherwise get different results)
+# based on your username (unique amongst class)
+Sys.info()[["user"]] %>% 
+  digest::digest2int() %>% 
+  set.seed()
+i10 <- sample(1:n_spp, 10)
+
+# show the 10 indices sampled of the 10,000 possible 
+i10
+
+```
+
+```{r}
+# show the 10 species directory names
+basename(dirs_spp)[i10]
+```
+```{r}
+i2 <- i10[1:2]
+basename(dirs_spp)[i2]
+```
+
+```{r}
+# setup data frame with source (src) and destination (dest) paths to images
+idata <- tibble(
+  set     = c(rep("spp2", 2), rep("spp10", 10)),
+  dir_sp  = c(dirs_spp[i2], dirs_spp[i10]),
+  tbl_img = map(dir_sp, function(dir_sp){
+    tibble(
+      src_img = list.files(dir_sp, full.names = T),
+      subset  = c(rep("train", 30), rep("validation", 10), rep("test", 10))) })) %>% 
+  unnest(tbl_img) %>% 
+  mutate(
+    sp       = basename(dir_sp),
+    img      = basename(src_img),
+    dest_img = glue("{dir_dest}/{set}/{subset}/{sp}/{img}"))
+
+# show source and destination for first 10 rows of tibble
+# idata %>% 
+#   select(src_img, dest_img)
+
+idata %>% 
+  pwalk(function(src_img, dest_img, ...){
+    dir.create(dirname(dest_img), recursive = T, showWarnings = F)
+    file.copy(src_img, dest_img) })
+```
+
+Tried a thing:
+
+```{r, eval=FALSE}
+# filepath labels
+train2_dir = file.path(dir_dest, "spp2/train")
+test2_dir = file.path(dir_dest, "spp2/test")
+validation2_dir = file.path(dir_dest, "spp2/validation")
+train10_dir = file.path(dir_dest, "spp10/train")
+test10_dir = file.path(dir_dest, "spp10/test")
+validation10_dir = file.path(dir_dest, "spp10/validation")
+
+# Resize images for binary classification
+datagen_resizr <- image_data_generator(rescale = 1/255)
+
+tensor_gen <- function(img_subset) {
+  
+  img_dir2 = paste0(img_subset + "2_dir")
+  img_dir10 = paste0(img_subset + "10_dir")
+    
+    flow_images_from_directory(
+  img_dir2,
+  datagen_resizr,
+  target_size = c(150, 150),
+  batch_size = 10,
+  class_mode = "binary"
+  )
+    
+    generator10 <- flow_images_from_directory(
+  img_dir10,
+  datagen_resizr,
+  target_size = c(150, 150),
+  batch_size = 10,
+  class_mode = "binary"
+  )
+}
+```
+
+
+# Binary Neural Net
+
+```{r}
+
+```
+
+# Binary Convolutional Neural Net
+
+```{r}
+
+```
+
+# Multiclass Neural Net
+
+```{r}
+
+```
+
+# Multiclass Convolutional Neural Net
+
+```{r}
+
+```
