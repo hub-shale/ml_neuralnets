@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
-options(scipen = 20)
+options(scipen = 100)
 ```
 
 # Data Setup
@@ -184,7 +184,8 @@ nn_history <- nn_model %>% fit(
   steps_per_epoch = 1,
   epochs = 30,
   validation_data = val_generator,
-  validation_steps = 1
+  validation_steps = 1,
+  verbose = 1
 )
 ```
 
@@ -268,6 +269,7 @@ val10_generator <- flow_images_from_directory(
 model10 <- keras_model_sequential() %>% 
   layer_dense(units = 64, activation = "relu", input_shape = c(150,150,3)) %>% 
   layer_dense(units = 64, activation = "relu") %>% 
+  layer_flatten() %>%
   layer_dense(units = 10, activation = "softmax")
 ```
 
@@ -275,30 +277,63 @@ model10 <- keras_model_sequential() %>%
 model10 %>% compile(
   optimizer = "rmsprop",
   loss = "categorical_crossentropy",
-  metrics = c("accuracy")
+  metrics = c("acc")
 )
 ```
 
 ```{r}
-history10 <- model10 %>% fit(
+history10 <- fit(model10,
   train10_generator,
-  steps_per_epoch = 1,
+  steps_per_epoch = 10,
   epochs = 30,
   validation_data = val10_generator,
-  validation_steps = 1
+  validation_steps = 10
 )
 ```
 
 ```{r}
 plot(history10)
 
-model10 %>% predict(test10_generator)
+model10 %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
 ```
 
 # Multiclass Convolutional Neural Net
 
 ```{r}
+conv10_model <- keras_model_sequential() %>%
+layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu",
+input_shape = c(150, 150, 3)) %>%
+layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>% layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>% layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>% layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_flatten() %>%
+layer_dense(units = 512, activation = "relu") %>%
+layer_dense(units = 10, activation = "softmax")
+```
 
+```{r}
+conv10_model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = "rmsprop",
+  metrics = c("acc")
+)
+```
+
+```{r}
+c10_history <- conv10_model %>% fit(
+  train10_generator,
+  steps_per_epoch = 10,
+  epochs = 30,
+  validation_data = val10_generator,
+  validation_steps = 10
+)
+```
+
+```{r}
+plot(c10_history)
+
+conv10_model %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
 ```
 
 ## Comparison of NN/CNN for Categorical (n=10) Classification
