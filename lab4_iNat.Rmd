@@ -193,6 +193,8 @@ nn_history <- nn_model %>% fit(
 plot(nn_history)
 
 nn_model %>% predict(test_generator)
+
+nn_model %>% evaluate(test_generator, steps = 10)
 ```
 
 # Binary Convolutional Neural Net
@@ -232,6 +234,8 @@ c_history <- conv_model %>% fit(
 plot(c_history)
 
 conv_model %>% predict(test_generator)
+
+conv_model %>% evaluate(test_generator, steps = 10)
 ```
 
 ## Comparison of NN/CNN for Binary Classification:
@@ -295,6 +299,8 @@ history10 <- fit(model10,
 plot(history10)
 
 model10 %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
+
+model10 %>% evaluate(test10_generator, steps = 100)
 ```
 
 # Multiclass Convolutional Neural Net
@@ -334,6 +340,8 @@ c10_history <- conv10_model %>% fit(
 plot(c10_history)
 
 conv10_model %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
+
+conv10_model %>% evaluate(test10_generator, steps = 100)
 ```
 
 ## Comparison of NN/CNN for Categorical (n=10) Classification
