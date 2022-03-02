@@ -182,7 +182,7 @@ nn_model %>% compile(
 nn_history <- nn_model %>% fit(
   train_generator,
   steps_per_epoch = 1,
-  epochs = 30,
+  epochs = 20,
   validation_data = val_generator,
   validation_steps = 1,
   verbose = 1
@@ -192,7 +192,7 @@ nn_history <- nn_model %>% fit(
 ```{r}
 plot(nn_history)
 
-nn_model %>% predict(test_generator)
+# nn_model %>% predict(test_generator)
 
 nn_model %>% evaluate(test_generator, steps = 10)
 ```
@@ -223,23 +223,23 @@ conv_model %>% compile(
 ```{r}
 c_history <- conv_model %>% fit(
   train_generator,
-  steps_per_epoch = 1,
-  epochs = 30,
+  steps_per_epoch = 2,
+  epochs = 20,
   validation_data = val_generator,
-  validation_steps = 1
+  validation_steps = 2
 )
 ```
 
 ```{r}
 plot(c_history)
 
-conv_model %>% predict(test_generator)
+# conv_model %>% predict(test_generator)
 
 conv_model %>% evaluate(test_generator, steps = 10)
 ```
 
 ## Comparison of NN/CNN for Binary Classification:
-**The **
+**For the binary classification problem, I found that the standard neural net and convolutional neural net typically performed quite similarly on the testing data, with loss values around 0.3-0.5 and accuracy usually between 80-90%. Because the models learn slightly differently each time, the exact numbers vary. They are both calculated after 20 epochs (reduced from 30 to save on processing time because accuracy was not any higher with 30 vs 20 epochs). **
 
 # Multiclass Neural Net
 
@@ -248,7 +248,7 @@ train10_generator <- flow_images_from_directory(
   train10_dir,
   train_datagen,
   target_size = c(150, 150),
-  batch_size = 30,
+  batch_size = 20,
   class_mode = "categorical"
 )
 
@@ -274,6 +274,7 @@ model10 <- keras_model_sequential() %>%
   layer_dense(units = 64, activation = "relu", input_shape = c(150,150,3)) %>% 
   layer_dense(units = 64, activation = "relu") %>% 
   layer_flatten() %>%
+  layer_dense(units = 64, activation = "relu") %>% 
   layer_dense(units = 10, activation = "softmax")
 ```
 
@@ -289,7 +290,7 @@ model10 %>% compile(
 history10 <- fit(model10,
   train10_generator,
   steps_per_epoch = 10,
-  epochs = 30,
+  epochs = 20,
   validation_data = val10_generator,
   validation_steps = 10
 )
@@ -298,9 +299,12 @@ history10 <- fit(model10,
 ```{r}
 plot(history10)
 
-model10 %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
+# model10 %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
 
 model10 %>% evaluate(test10_generator, steps = 100)
+
+loss_50e = 2.25
+acc_50e = .52
 ```
 
 # Multiclass Convolutional Neural Net
@@ -330,7 +334,7 @@ conv10_model %>% compile(
 c10_history <- conv10_model %>% fit(
   train10_generator,
   steps_per_epoch = 10,
-  epochs = 30,
+  epochs = 20,
   validation_data = val10_generator,
   validation_steps = 10
 )
@@ -339,10 +343,11 @@ c10_history <- conv10_model %>% fit(
 ```{r}
 plot(c10_history)
 
-conv10_model %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
+# conv10_model %>% predict(test10_generator) %>% DT::datatable(options = list(pageLength = 20))
 
 conv10_model %>% evaluate(test10_generator, steps = 100)
+
 ```
 
 ## Comparison of NN/CNN for Categorical (n=10) Classification
-**The **
+**For the multiclass classification problem, the standard neural net typically had a testing accuracy above 50% while the convolutional neural net usually performed slightly worse, with testing accuracy below 50%. Both loss values hovered around 1.5. Overall, the lack of accuracy in these models can be ascribed to the lack of training data (30 images were used instead of thousands, which is more typical). This means that the effectiveness of parameter tuning is severely limited: for example, after training a model with 50 epochs, the multiclass convolutional neural network still only achieved an accuracy of 51%.**
